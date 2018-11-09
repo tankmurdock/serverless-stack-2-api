@@ -29,10 +29,11 @@ provider:
   stage: dev
   region: us-east-1
 
-  # These environment variables are made available to our functions
-  # under process.env.
-  environment:
-    tableName: ${self:custom.tableName}
+ # These environment variables are made available to our functions
+ # under process.env.
+environment:
+  tableName:
+    Ref: NotesTable
 
   iamRoleStatements:
     - Effect: Allow
@@ -65,7 +66,7 @@ functions:
           method: post
           cors: true
           authorizer: aws_iam
-
+  
   get:
     # Defines an HTTP API endpoint that calls the main function in get.js
     # - path: url path is /notes/{id}
@@ -113,8 +114,17 @@ functions:
           method: delete
           cors: true
           authorizer: aws_iam
+  billing:
+    handler: billing.main
+    events:
+      - http:
+          path: billing
+          method: post
+          cors: true
+          authorizer: aws_iam
+                  
   # Create our resources with separate CloudFormation templates
-  resources:
+resources:
     # DynamoDB
     - ${file(resources/dynamodb-table.yml)}
     # S3
